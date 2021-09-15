@@ -1,0 +1,74 @@
+{
+   "AWSTemplateFormatVersion": "2010-09-09",
+   "Parameters" : {
+  "ovaBucket" : {
+    "Type" : "String",
+    "Default" : "",
+    "Description" : "Enter S3 Bucket where OVA files are stored."
+  }
+},
+   "Resources": {
+      "vmimportrole": {
+         "Type": "AWS::IAM::Role",
+         "Properties": {
+            "RoleName": "vmimport",
+            "AssumeRolePolicyDocument": {
+               "Version" : "2012-10-17",
+               "Statement": [ {
+                  "Effect": "Allow",
+                  "Principal": {
+                     "Service": [ "vmie.amazonaws.com" ]
+                  },
+                  "Action": [ "sts:AssumeRole" ],
+                  "Condition":{ 
+                     "StringEquals":{ 
+                        "sts:ExternalId":"vmimport" 
+                     } 
+                  }
+               } ]
+            },
+            "Path": "/"
+         }
+      },
+      "RolePolicies": {
+         "Type": "AWS::IAM::Policy",
+         "Properties": {
+            "PolicyName": "vmimport",
+            "PolicyDocument": {
+               "Version":"2012-10-17",
+               "Statement":[
+               {
+               "Effect":"Allow",
+               "Action":[
+               "s3:ListBucket",
+               "s3:GetBucketLocation"
+               ],
+               "Resource":
+                  {"Fn::Sub" : "arn:aws:s3:::${ovaBucket}"}
+               },
+               {
+               "Effect":"Allow",
+               "Action":[
+               "s3:GetObject"
+               ],
+               "Resource":[
+                  {"Fn::Sub" : "arn:aws:s3:::${ovaBucket}/*"}
+               ]
+               },
+               {
+               "Effect":"Allow",
+               "Action":[
+               "ec2:ModifySnapshotAttribute",
+               "ec2:CopySnapshot",
+               "ec2:RegisterImage",
+               "ec2:Describe*"
+               ],
+               "Resource":"*"
+               }
+               ]
+               },
+            "Roles": [ { "Ref": "vmimportrole" } ]
+         }
+      }
+   }
+}

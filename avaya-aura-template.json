@@ -1,0 +1,1276 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "Avaya Aura deployment template",
+  "Metadata" : {
+  "AWS::CloudFormation::Interface": {
+    "ParameterGroups" :[
+      {
+        "Label" : { "default":"Remote access Bastion" },
+        "Parameters" : [ "BastionType", "BastionAMI","KeyName","SSHLocation" ]
+      },
+      {
+        "Label" : { "default" : "AMI Images" },
+        "Parameters" : ["SBCAMI", "SMGRAMI","CMAMI","SMAMI","MSAMI"]
+      },
+      {
+        "Label" : { "default" : "Network Configuration" },
+        "Parameters" : [ "VPCCIDR", "PvtSub1", "PvtSub2", "PubSub1","PubSub2", "MgtSub1", "MgtSub2" ]
+      },
+      {
+        "Label" : { "default":"SBC Configuration" },
+        "Parameters" : [ "SBCDeploymentType", "EMSInstanceType", "SBCInstanceType", "SBC1Mgt1IP", "SBC1Mgt2IP", "SBC1Pvt1IP", "SBC1Pvt2IP", "SBC1Pub1IP", "SBC1Pub2IP","EMS1Mgt1IP", "EMS1Mgt2IP"]
+      },
+      {
+        "Label" : { "default":"SBC HA Configuration" },
+        "Parameters" : [ "SBC2Mgt1IP", "SBC2Mgt2IP", "SBC2Pvt1IP", "SBC2Pvt2IP", "SBC2Pub1IP", "SBC2Pub2IP"]
+      },
+
+      {
+        "Label" : { "default":"Aura Core Configuration" },
+        "Parameters" : [ "SMGRInstanceType", "SMGR1Mgt1IP","CMInstanceType","CM1Mgt1IP","CM2Mgt1IP","SMInstanceType","SM1Mgt1IP","SM1SM100IP","SM2Mgt1IP","SM2SM100IP","MSInstanceType","MS1Mgt1IP"]
+      },
+      {
+        "Label" : { "default":"High Availability Configuration" },
+        "Parameters" : [ "DeployHAAuraCore","CM2Mgt1IP","SM2Mgt1IP","SM2SM100IP","MS2Mgt1IP","DeployHAManagement","SMGR2Mgt1IP"]
+      }
+    ],
+    "ParameterLabels" : {
+      "VPCCIDR" : { "default" : "VPC IP Addressing" },
+      "SSHLocation" : { "default" : "IP Address for management console" },
+      "EMSInstanceType" : { "default" : "Instance type for EMS" },
+      "SBCInstanceType" : { "default" : "Instance type for SBC" },
+      "BastionType" : { "default" : "Instance type for bastion host" },
+      "SBCAMI" : { "default" : "Session Border Controller Image" },
+      "KeyName" : { "default" : "Key Name for bastion access" },
+      "PvtSub1" : { "default" : "Private subnet 1 IP address " },
+      "PvtSub2" : { "default" : "Private subnet 2 IP address " },
+      "PubSub1" : { "default" : "Public subnet 1 IP address " },
+      "PubSub2" : { "default" : "Public subnet 2 IP address " },
+      "MgtSub1" : { "default" : "Management subnet 1 IP address " },
+      "MgtSub2" : { "default" : "Management subnet 2 IP address " },
+      "SBC1Mgt1IP" : { "default" : "SBC 1 Management Interface 1 IP Address" },
+      "SBC1Mgt2IP" : { "default" : "SBC 1 Management Interface 2 IP Address" },
+      "SBC1Pvt1IP" : { "default" : "SBC 1 Private Interface 1 IP Address" },
+      "SBC1Pvt2IP" : { "default" : "SBC 1 Private Interface 1 IP Address" },
+      "SBC1Pub1IP" : { "default" : "SBC 1 Public Interface 1 IP Address" },
+      "SBC1Pub2IP" : { "default" : "SBC 1 Public Interface 2 IP Address" },
+      "SBC2Mgt1IP" : { "default" : "SBC 2 Management Interface 1 IP Address" },
+      "SBC2Mgt2IP" : { "default" : "SBC 2 Management Interface 2 IP Address" },
+      "SBC2Pvt1IP" : { "default" : "SBC 2 Private Interface 1 IP Address" },
+      "SBC2Pvt2IP" : { "default" : "SBC 2 Private Interface 1 IP Address" },
+      "SBC2Pub1IP" : { "default" : "SBC 2 Public Interface 1 IP Address" },
+      "SBC2Pub2IP" : { "default" : "SBC 2 Public Interface 2 IP Address" },
+      "EMS1Mgt1IP" : { "default" : "EMS 1 Management Interface 1 IP Address" },
+      "EMS1Mgt2IP" : { "default" : "EMS 1 Management Interface 2 IP Address" },
+      "SBCDeploymentType" : { "default" : "Deployment Type for EMS + SBC" },
+      "DeployHAAuraCore" : { "default" : "Deploy redundant Aura Core roles" },
+      "DeployHAManagement": { "default" : "Deploy redundant roles for System Manager" },
+      "SMGRAMI":{ "default" : "System Manager Image" },
+      "CMAMI":{ "default" : "Communication Manager Image" },
+      "SMAMI":{ "default" : "Session Manager Image" },
+      "MSAMI":{ "default" : "Media Server Image" },
+      "SMGR1Mgt1IP":{ "default" : "System Manager IP address" },
+      "SMGR2Mgt1IP":{ "default" : "System Manager HA IP address" },
+      "SM1Mgt1IP":{ "default" : "Session Manager 1 IP address" },
+      "SM2Mgt1IP":{ "default" : "Session Manager 2 IP address" },
+      "SMGRInstanceType":{ "default" : "System Manager instance type" },
+      "SM1SM100IP":{ "default" : "Session Manager 1 Security Module IP address" },
+      "SM2SM100IP":{ "default" : "Session Manager 2 Security Module IP address" },
+      "CMInstanceType":{ "default" : "Communication Manager instance type" },
+      "SMInstanceType":{ "default" : "Session Manager instance type" },
+      "CM1Mgt1IP":{ "default" : "Communication Manager 1 IP address" },
+      "CM2Mgt1IP":{ "default" : "Communication Manager HA IP address" },
+      "MSInstanceType":{ "default" : "Media Server instance type" },
+      "MS1Mgt1IP":{ "default" : "Media Server 1 IP address" }, 
+      "MS2Mgt1IP":{ "default" : "Media Server 2 IP address" }
+      }
+  }
+},
+  "Parameters" : {
+    "DeployHAAuraCore" : {
+        "Description" : "Include redundant instances for CM, SM and MS roles",
+        "Type" : "String",
+        "Default" : "False",
+        "AllowedValues" : [ "True", "False"]
+      },
+    "DeployHAManagement" : {
+        "Description" : "Include redundant instances for System Manager and EMS",
+        "Type" : "String",
+        "Default" : "False",
+        "AllowedValues" : [ "True", "False"],
+        "ConstraintDescription" : "Deploy CM, SM, MS and SMGR roles"
+      },
+    "SMInstanceType" : {
+        "Description" : "Used only when deploying Aura Core roles. Leave default values otherwise.",
+        "Type" : "String",
+        "Default" : "c4.xlarge",
+        "AllowedValues" : [ "c4.xlarge", "c4.2xlarge","c4.4xlarge","c4.8xlarge","c5.18xlarge"],
+        "ConstraintDescription" : "Required instance type for Session Manager."
+      },
+    "SMAMI" : {
+        "Type" : "String"
+      },
+    "SMGRInstanceType" : {
+        "Type" : "String",
+        "Default" : "m4.2xlarge",
+        "AllowedValues" : [ "m4.2xlarge", "m4.10xlarge"],
+        "ConstraintDescription" : "Required instance type for SMGR."
+      },
+    "SMGRAMI" : {
+        "Description" : "AMI ID.",
+        "Type" : "String"
+      },
+    "CMInstanceType" : {
+        "Type" : "String",
+        "Default" : "m4.large",
+        "AllowedValues" : [ "m4.large", "c4.xlarge"],
+        "ConstraintDescription" : "Required instance type for CM."
+      },
+    "CMAMI" : {
+        "Description" : "AMI ID.",
+        "Type" : "String"
+      },
+    "SBCDeploymentType" : {
+        "Description" : "Specify option for EMS + SBC",
+        "Type" : "String",
+        "Default" : "Single-Instance",
+        "AllowedValues" : [ "Single-Instance", "Separate-Instances","HA-SBC"],
+        "ConstraintDescription" : "Specify which deployment model to use."
+      },    
+    "EMSInstanceType" : {
+        "Description" : "Used only when Separate SBC roles are deployed. Leave default values otherwise.",
+        "Type" : "String",
+        "Default" : "c4.xlarge",
+        "AllowedValues" : [ "c4.xlarge", "c5n.xlarge"],
+        "ConstraintDescription" : "Required instance type for EMS."
+      },
+    "SBCInstanceType" : {
+        "Type" : "String",
+        "Default" : "c4.4xlarge",
+        "AllowedValues" : [ "c4.4xlarge", "c5n.4xlarge"],
+        "ConstraintDescription" : "Required instance type for SBC."
+      },
+      "BastionType":{
+        "Description" : "Bastion Instance Type",
+        "Type" : "String",
+        "Default" : "t3.medium",
+        "AllowedValues" : [ "t3.small", "t3.medium"],
+        "ConstraintDescription" : "Required instance type for SBC."
+      },
+    "BastionAMI":{
+        "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+        "Default" : "/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base",
+        "AllowedValues" : [ "/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base", "/aws/service/ami-windows-latest/Windows_Server-2016-English-Full-Base", "/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base"]
+    },
+    "SBCAMI" : {
+        "Description" : "SBC AMI ID",
+        "Type" : "String"
+      },
+    "KeyName": {
+      "Description" : "Select an existing EC2 KeyPair to enable SSH access to the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
+      },
+      "SSHLocation" : {
+        "Description" : "Authorized IP for SSH access on Bastion (Specify as /32 CIDR)",
+        "Type" : "String",
+        "Default" : "10.0.10.10/32",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+      },
+    "VPCCIDR" : {
+        "Type" : "String",
+        "Default" : "10.0.0.0/16",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+      },
+    "PvtSub1" : {
+        "Type" : "String",
+        "Default" : "10.0.12.0/24",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+      },
+    "PvtSub2" : {
+        "Type" : "String",
+        "Default" : "10.0.13.0/24",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+      },
+    "PubSub1" : {
+        "Type" : "String",
+        "Default" : "10.0.14.0/24",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+      },
+    "PubSub2" : {
+        "Type" : "String",
+        "Default" : "10.0.15.0/24",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+      },
+    "MgtSub1" : {
+        "Type" : "String",
+        "Default" : "10.0.10.0/24",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+      },
+    "MgtSub2" : {
+        "Type" : "String",
+        "Default" : "10.0.11.0/24",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+      },
+    "SMGR1Mgt1IP" : {
+        "Type" : "String",
+        "Default" : "10.0.12.30",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "CM1Mgt1IP" : {
+        "Type" : "String",
+        "Default" : "10.0.12.32",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SMGR2Mgt1IP" : {
+        "Description" : "Used only when deploying High Availability roles. Leave default values otherwise.",
+        "Type" : "String",
+        "Default" : "10.0.13.30",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "CM2Mgt1IP" : {
+        "Description" : "Used only when deploying High Availability roles. Leave default values otherwise.",
+        "Type" : "String",
+        "Default" : "10.0.13.31",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SBC1Mgt1IP" : {
+        "Type" : "String",
+        "Default" : "10.0.10.21",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SBC1Mgt2IP" : {
+        "Type" : "String",
+        "Default" : "10.0.10.22",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SBC1Pvt1IP" : {
+        "Type" : "String",
+        "Default" : "10.0.12.21",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SBC1Pvt2IP" : {
+        "Type" : "String",
+        "Default" : "10.0.12.22",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SBC1Pub1IP" : {
+        "Type" : "String",
+        "Default" : "10.0.14.21",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SBC1Pub2IP" : {
+        "Type" : "String",
+        "Default" : "10.0.14.22",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SBC2Mgt1IP" : {
+        "Type" : "String",
+        "Default" : "10.0.11.21",
+        "Description" : "Used only when deploying High Availability roles. Leave default values otherwise.",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SBC2Mgt2IP" : {
+        "Type" : "String",
+        "Default" : "10.0.11.22",
+        "Description" : "Used only when deploying High Availability roles. Leave default values otherwise.",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SBC2Pvt1IP" : {
+        "Type" : "String",
+        "Default" : "10.0.13.21",
+        "Description" : "Used only when deploying High Availability roles. Leave default values otherwise.",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SBC2Pvt2IP" : {
+        "Type" : "String",
+        "Default" : "10.0.13.22",
+        "Description" : "Used only when deploying High Availability roles. Leave default values otherwise.",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SBC2Pub1IP" : {
+        "Type" : "String",
+        "Default" : "10.0.15.21",
+        "Description" : "Used only when deploying High Availability roles. Leave default values otherwise.",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SBC2Pub2IP" : {
+        "Type" : "String",
+        "Default" : "10.0.15.22",
+        "Description" : "Used only when deploying High Availability roles. Leave default values otherwise.",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "EMS1Mgt1IP" : {
+        "Description" : "Used only when Separate SBC roles are deployed. Leave default values otherwise.",
+        "Type" : "String",
+        "Default" : "10.0.10.10",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "EMS1Mgt2IP" : {
+        "Description" : "Used only when Separate SBC roles are deployed. Leave default values otherwise.",
+        "Type" : "String",
+        "Default" : "10.0.10.11",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SM1Mgt1IP" : {
+        "Type" : "String",
+        "Default" : "10.0.12.37",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SM2Mgt1IP" : {
+        "Description" : "Used only when deploying High Availability roles. Leave default values otherwise.",
+        "Type" : "String",
+        "Default" : "10.0.13.37",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SM1SM100IP" : {
+        "Type" : "String",
+        "Default" : "10.0.12.38",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "SM2SM100IP" : {
+        "Description" : "Used only when deploying High Availability roles. Leave default values otherwise.",
+        "Type" : "String",
+        "Default" : "10.0.13.38",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+      },
+    "MSInstanceType":{
+          "Type" : "String",
+          "Default" : "c4.2xlarge",
+          "AllowedValues" : [ "c4.2xlarge"],
+          "ConstraintDescription" : "Required instance type for Media Server role."
+        },
+    "MSAMI" : {
+        "Description" : "AMI ID.",
+        "Type" : "String",
+        "Default" : "RHEL79",
+        "AllowedValues" : [ "RHEL79", "RHEL8"]
+      },
+    "MS1Mgt1IP":{
+          "Type" : "String",
+          "Default" : "10.0.12.35",
+          "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+        },
+    "MS2Mgt1IP":{
+        "Description" : "Used only when deploying High Availability roles. Leave default values otherwise.",
+        "Type" : "String",
+        "Default" : "10.0.13.35",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
+        }
+  },
+  "Conditions":{
+        "SBCSingleServer" : {
+          "Fn::Equals": [
+            {"Ref": "SBCDeploymentType"},
+            "Single-Instance"
+          ]
+        },
+        "SBCSeparateServer" : {
+          "Fn::Or":
+          [
+            {"Fn::Equals": [{"Ref": "SBCDeploymentType"},"Separate-Instances"]},
+            {"Fn::Equals": [{"Ref": "SBCDeploymentType"},"HA-SBC"]}
+          ]
+        },
+        "SBCHA" : {
+          "Fn::Equals": [
+            {"Ref": "SBCDeploymentType"},
+            "HA-SBC"
+          ]
+        },
+        "DeployHACore" : {
+            "Fn::Equals": [{"Ref": "DeployHAAuraCore"},"True"]
+        },
+        "DeployHAMgt" : {  
+            "Fn::Equals": [{"Ref": "DeployHAManagement"},"True"]
+          }
+        },
+  "Mappings" : {
+  "AWSRegion2AMI" : {
+    "us-east-1"      : { "Windows2019": "ami-029bfac3973c1bda1", "RHEL8" : "ami-0b0af3577fe5e3532", "RHEL79":"ami-005b7876121b7244d"},
+    "us-east-2"      : { "Windows2019": "ami-0a727a421bd5a51a3", "RHEL8" : "ami-0ba62214afa52bec7", "RHEL79":"ami-0d2bf41df19c4aac7"},
+    "us-west-2"      : { "Windows2019": "ami-0e9172b6cfc14e8d2", "RHEL8" : "ami-0b28dfc7adc325ef4", "RHEL79":"ami-02d40d11bb3aaf3e5" },
+    "us-west-1"      : { "Windows2019": "ami-0f87a682fa9d0ff58", "RHEL8" : "ami-054965c6cd7c6e462", "RHEL79":"ami-015474e24281c803d" },
+    "eu-west-1"      : { "Windows2019": "ami-0b0b2182e19d73648", "RHEL8" : "ami-0ec23856b3bad62d3", "RHEL79":"ami-020e14de09d1866b4" },
+    "sa-east-1"      : { "Windows2019": "ami-08b543cf3876d6acc", "RHEL8" : "ami-0c2485d67d416fc4f", "RHEL79":"ami-07eca9d9caaced495" },
+    "eu-central-1"   : { "Windows2019": "ami-00bdbdac0da69a3b4", "RHEL8" : "ami-06ec8443c2a35b0ba", "RHEL79":"ami-0f58468b80db2db66" }
+    }
+  },
+  "Resources" : {
+    "VPC" : {
+      "Type" : "AWS::EC2::VPC",
+      "Properties" : {
+        "EnableDnsHostnames" : "true",
+        "EnableDnsSupport" : "true",  
+        "CidrBlock" : { "Ref" : "VPCCIDR" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"VPC" ] ] } }]
+      }
+    },
+
+    "PrivateSubnet1" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "0", {"Fn::GetAZs" : "" }]
+            },
+        "CidrBlock" : { "Ref" : "PvtSub1" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"PrivateSubnet1" ] ] } }]
+      }
+    },
+
+    "PrivateSubnet2" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "1", {"Fn::GetAZs" : "" }]
+            },        
+        "CidrBlock" : { "Ref" : "PvtSub2" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"PrivateSubnet2" ] ] } }]
+      }
+    },
+    "PublicSubnet1" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "0", {"Fn::GetAZs" : "" }]
+            },
+        "CidrBlock" : { "Ref" : "PubSub1" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"PublicSubnet1" ] ] } }]
+      }
+    },
+
+    "PublicSubnet2" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "1", {"Fn::GetAZs" : "" }]
+            },
+        "CidrBlock" : { "Ref" : "PubSub2" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"PublicSubnet2" ] ] } }]
+      }
+    },
+    "ManageSubnet1" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "0", {"Fn::GetAZs" : "" }]
+            },
+        "CidrBlock" : { "Ref" : "MgtSub1" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"ManagementSubnet1" ] ] } }]
+      }
+    },
+
+    "ManageSubnet2" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "1", {"Fn::GetAZs" : "" }]
+            },
+        "CidrBlock" : { "Ref" : "MgtSub2" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"ManagementSubnet2" ] ] } }]
+      }
+    },
+
+    "InternetGateway" : {
+      "Type" : "AWS::EC2::InternetGateway",
+      "Properties" : {
+        "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ]
+      }
+    },
+
+    "AttachGateway" : {
+       "Type" : "AWS::EC2::VPCGatewayAttachment",
+       "Properties" : {
+         "VpcId" : { "Ref" : "VPC" },
+         "InternetGatewayId" : { "Ref" : "InternetGateway" }
+       }
+    },
+
+    "RouteTable" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPC"},
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"PublicRouteTable" ] ] } }]
+      }
+    },
+
+    "PubRoute" : {
+      "Type" : "AWS::EC2::Route",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "RouteTable" },
+        "DestinationCidrBlock" : "0.0.0.0/0",
+        "GatewayId" : { "Ref" : "InternetGateway" }
+      }
+    },
+
+    "PubSub1RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "PublicSubnet1" },
+        "RouteTableId" : { "Ref" : "RouteTable" }
+      }
+    },
+
+    "PubSub2RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "PublicSubnet2" },
+        "RouteTableId" : { "Ref" : "RouteTable" }
+      }
+    },
+
+    "SBCPublicIP" : {
+      "Type" : "AWS::EC2::EIP",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC-1-IP" ] ] } }],
+        "Domain" : "vpc"
+      }
+    },
+
+    "AttachSBCPublicIP" : {
+      "Type" : "AWS::EC2::EIPAssociation",
+      "Properties" : {
+          "AllocationId" : { "Fn::GetAtt" : [ "SBCPublicIP", "AllocationId"] },
+          "NetworkInterfaceId" : { "Ref" : "SBC1Pub1Int" } 
+        }
+    },
+  
+    "SBC2PublicIP" : {
+      "Type" : "AWS::EC2::EIP",
+      "Condition": "SBCHA",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC-2-IP" ] ] } }],
+        "Domain" : "vpc"
+      }
+    },
+
+    "AttachSBC2PublicIP" : {
+      "Type" : "AWS::EC2::EIPAssociation",
+      "Condition": "SBCHA",
+      "Properties" : {
+          "AllocationId" : { "Fn::GetAtt" : [ "SBC2PublicIP", "AllocationId"] },
+          "NetworkInterfaceId" : { "Ref" : "SBC1Pub1Int" } 
+        }
+    },
+
+    "SBCPvtSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "SBC Private Interface SG",
+        "SecurityGroupIngress" : [
+          { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "VPCCIDR"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "MgtSub1"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "MgtSub2"}}
+         ]
+      }
+    },
+    "SBCPubSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "SBC Public Interface SG",
+        "SecurityGroupIngress" : [
+          { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "tcp", "FromPort" : "9443", "ToPort" : "9443", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "tcp", "FromPort" : "843", "ToPort" : "843", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "tcp", "FromPort" : "522", "ToPort" : "5222", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "tcp", "FromPort" : "3478", "ToPort" : "3478", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "tcp", "FromPort" : "40000", "ToPort" : "55000", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "udp", "FromPort" : "40000", "ToPort" : "55000", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "udp", "FromPort" : "5060", "ToPort" : "5061", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "tcp", "FromPort" : "5060", "ToPort" : "5061", "CidrIp" : "0.0.0.0/0"}
+
+         ]
+      }
+    },
+    "SBCMgtSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "SBC SG",
+        "SecurityGroupIngress" : [
+          { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "VPCCIDR"}},
+          { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
+          { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "MgtSub1"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "MgtSub2"}}
+         ]
+      }
+    },
+    "SMGRSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "SMGR SG",
+        "SecurityGroupIngress" : [
+          { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "VPCCIDR"}},
+          { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
+          { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}}
+         ]
+      }
+    },
+    "SMSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "SMGR SG",
+        "SecurityGroupIngress" : [
+          { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "VPCCIDR"}},
+          { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : { "Ref" : "VPCCIDR"}},
+          { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
+          { "IpProtocol" : "tcp", "FromPort" : "161", "ToPort" : "161", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}}
+         ]
+      }
+    },
+    "SM100SecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "SMGR SG",
+        "SecurityGroupIngress" : [
+          { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "VPCCIDR"}},
+          { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : { "Ref" : "VPCCIDR"}},
+          { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : { "Ref" : "VPCCIDR"}},
+          { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
+          { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
+          { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}}
+         ]
+      }
+    },
+    "CMSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "SMGR SG",
+        "SecurityGroupIngress" : [
+          { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "VPCCIDR"}},
+          { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : { "Ref" : "VPCCIDR"}},
+          { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "23", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
+          { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
+          { "IpProtocol" : "tcp", "FromPort" : "8443", "ToPort" : "8443", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
+          { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}}
+         ]
+      }
+    },
+    "ManagementSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "Management SG",
+        "SecurityGroupIngress" : [
+          {"IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "SourceSecurityGroupId" : { "Ref" : "BastionSecurityGroup"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}}
+         ]
+      }
+    },
+    "BastionSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "Bastion Access",
+        "SecurityGroupIngress" : [
+          {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation"}},
+          {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SSHLocation"}}
+         ]
+      }
+    },
+    "PhonesSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "Management SG",
+        "SecurityGroupIngress" : [
+          { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "VPCCIDR"}},
+          {"IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "SourceSecurityGroupId" : { "Ref" : "BastionSecurityGroup"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
+          { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}}
+         ]
+      }
+    },
+    "EMS1Mgt2Int" : {
+       "Type" : "AWS::EC2::NetworkInterface",
+       "Properties" : 
+        {
+          "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC1-Mgt2-Int" ] ] } }],
+          "SourceDestCheck": "false",
+          "GroupSet"                 : [{ "Ref" : "SBCMgtSecurityGroup" }],
+          "SubnetId"                 : { "Ref" : "ManageSubnet1" },
+          "PrivateIpAddress": { "Ref" : "EMS1Mgt2IP" }
+          }
+    },
+    "SBC1Mgt2Int" : {
+       "Type" : "AWS::EC2::NetworkInterface",
+       "Properties" : 
+        {
+          "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC1-Mgt2-Int" ] ] } }],
+          "SourceDestCheck": "false",
+          "GroupSet"                 : [{ "Ref" : "SBCMgtSecurityGroup" }],
+          "SubnetId"                 : { "Ref" : "ManageSubnet1" },
+          "PrivateIpAddress": { "Ref" : "SBC1Mgt2IP" }
+          }
+    },
+    "SBC1Pub1Int" : {
+       "Type" : "AWS::EC2::NetworkInterface",
+       "Properties" : 
+        {
+          "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC1-Pub1-Int" ] ] } }],
+          "SourceDestCheck": "false",
+          "GroupSet"                 : [{ "Ref" : "SBCPubSecurityGroup" }],
+          "SubnetId"                 : { "Ref" : "PublicSubnet1" },
+          "PrivateIpAddress": { "Ref" : "SBC1Pub1IP" }
+          }
+    },
+    "SBC1Pub2Int" : {
+       "Type" : "AWS::EC2::NetworkInterface",
+       "Properties" : 
+        {
+          "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC1-Pub2-Int" ] ] } }],
+          "SourceDestCheck": "false",
+          "GroupSet"                 : [{ "Ref" : "SBCPubSecurityGroup" }],
+          "SubnetId"                 : { "Ref" : "PublicSubnet1" },
+          "PrivateIpAddress": { "Ref" : "SBC1Pub2IP" }
+          }
+    },
+    "SBC1Pvt1Int" : {
+       "Type" : "AWS::EC2::NetworkInterface",
+       "Properties" : 
+        {
+          "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC1-Pvt1-Int" ] ] } }],
+          "SourceDestCheck": "false",
+          "GroupSet"                 : [{ "Ref" : "SBCPvtSecurityGroup" }],
+          "SubnetId"                 : { "Ref" : "PrivateSubnet1" },
+          "PrivateIpAddress": { "Ref" : "SBC1Pvt1IP" }
+          }
+    },
+    "SBC1Pvt2Int" : {
+       "Type" : "AWS::EC2::NetworkInterface",
+       "Properties" : 
+        {
+          "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC1-Pvt2-Int" ] ] } }],
+          "SourceDestCheck": "false",
+          "GroupSet"                 : [{ "Ref" : "SBCPvtSecurityGroup" }],
+          "SubnetId"                 : { "Ref" : "PrivateSubnet1" },
+          "PrivateIpAddress": { "Ref" : "SBC1Pvt2IP" }
+          }
+    },
+    "SBC2Mgt2Int" : {
+       "Type" : "AWS::EC2::NetworkInterface",
+       "Condition": "SBCHA",
+       "Properties" : 
+        {
+          "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC1-Mgt2-Int" ] ] } }],
+          "SourceDestCheck": "false",
+          "GroupSet"                 : [{ "Ref" : "SBCMgtSecurityGroup" }],
+          "SubnetId"                 : { "Ref" : "ManageSubnet2" },
+          "PrivateIpAddress": { "Ref" : "SBC2Mgt2IP" }
+          }
+    },
+    "SBC2Pub1Int" : {
+       "Type" : "AWS::EC2::NetworkInterface",
+       "Condition": "SBCHA",
+       "Properties" : 
+        {
+          "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC1-Pub1-Int" ] ] } }],
+          "SourceDestCheck": "false",
+          "GroupSet"                 : [{ "Ref" : "SBCPubSecurityGroup" }],
+          "SubnetId"                 : { "Ref" : "PublicSubnet2" },
+          "PrivateIpAddress": { "Ref" : "SBC2Pub1IP" }
+          }
+    },
+    "SBC2Pub2Int" : {
+       "Type" : "AWS::EC2::NetworkInterface",
+       "Condition": "SBCHA",
+       "Properties" : 
+        {
+          "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC1-Pub2-Int" ] ] } }],
+          "SourceDestCheck": "false",
+          "GroupSet"                 : [{ "Ref" : "SBCPubSecurityGroup" }],
+          "SubnetId"                 : { "Ref" : "PublicSubnet2" },
+          "PrivateIpAddress": { "Ref" : "SBC2Pub2IP" }
+          }
+    },
+    "SBC2Pvt1Int" : {
+       "Type" : "AWS::EC2::NetworkInterface",
+       "Condition": "SBCHA",
+       "Properties" : 
+        {
+          "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC1-Pvt1-Int" ] ] } }],
+          "SourceDestCheck": "false",
+          "GroupSet"                 : [{ "Ref" : "SBCPvtSecurityGroup" }],
+          "SubnetId"                 : { "Ref" : "PrivateSubnet2" },
+          "PrivateIpAddress": { "Ref" : "SBC2Pvt1IP" }
+          }
+    },
+    "SBC2Pvt2Int" : {
+       "Type" : "AWS::EC2::NetworkInterface",
+       "Condition": "SBCHA",
+       "Properties" : 
+        {
+          "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC1-Pvt2-Int" ] ] } }],
+          "SourceDestCheck": "false",
+          "GroupSet"                 : [{ "Ref" : "SBCPvtSecurityGroup" }],
+          "SubnetId"                 : { "Ref" : "PrivateSubnet2" },
+          "PrivateIpAddress": { "Ref" : "SBC2Pvt2IP" }
+          }
+    },
+    "SM1SM100Int" : {
+       "Type" : "AWS::EC2::NetworkInterface",
+       "Properties" : 
+        {
+          "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SM1-SM100-Int" ] ] } }],
+          "SourceDestCheck": "false",
+          "GroupSet"                 : [{ "Ref" : "SM100SecurityGroup" }],
+          "SubnetId"                 : { "Ref" : "PrivateSubnet1" },
+          "PrivateIpAddress": { "Ref" : "SM1SM100IP" }
+          }
+    },
+    "SM2SM100Int" : {
+       "Type" : "AWS::EC2::NetworkInterface",
+       "Condition": "DeployHACore",
+       "Properties" : 
+        {
+          "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SM2-SM100-Int" ] ] } }],
+          "SourceDestCheck": "false",
+          "GroupSet"                 : [{ "Ref" : "SM100SecurityGroup" }],
+          "SubnetId"                 : { "Ref" : "PrivateSubnet2" },
+          "PrivateIpAddress": { "Ref" : "SM2SM100IP" }
+          }
+    },
+    "SBCInstance" : {
+      "Type" : "AWS::EC2::Instance",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "ImageId" : { "Ref" : "SBCAMI"},
+        "InstanceType" : { "Ref" : "SBCInstanceType" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC-1" ] ] } }],    
+        "KeyName" : { "Ref" : "KeyName" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "0", {"Fn::GetAZs" : "" }]
+            },
+        "NetworkInterfaces" : [
+            {
+            "GroupSet"                 : [{ "Ref" : "SBCMgtSecurityGroup" }],
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "ManageSubnet1" },
+            "PrivateIpAddress": { "Ref" : "SBC1Mgt1IP" }
+            }       
+          ]
+      }
+    },
+    "SBC2Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "DependsOn" : "AttachGateway",
+      "Condition": "SBCHA",
+      "Properties" : {
+        "ImageId" : { "Ref" : "SBCAMI"},
+        "InstanceType" : { "Ref" : "SBCInstanceType" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SBC-2" ] ] } }],    
+        "KeyName" : { "Ref" : "KeyName" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "1", {"Fn::GetAZs" : "" }]
+            },
+        "NetworkInterfaces" : [
+            {
+            "GroupSet"                 : [{ "Ref" : "SBCMgtSecurityGroup" }],
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "ManageSubnet2" },
+            "PrivateIpAddress": { "Ref" : "SBC2Mgt1IP" }
+            }       
+          ]
+      }
+    },
+    "EMSInstance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition": "SBCSeparateServer",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "ImageId" : { "Ref" : "SBCAMI"},
+        "InstanceType" : { "Ref" : "SBCInstanceType" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"EMS-1" ] ] } }],    
+        "KeyName" : { "Ref" : "KeyName" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "0", {"Fn::GetAZs" : "" }]
+            },
+        "NetworkInterfaces" : [
+            {
+            "GroupSet"                 : [{ "Ref" : "SBCMgtSecurityGroup" }],
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "ManageSubnet1" },
+            "PrivateIpAddress": { "Ref" : "EMS1Mgt1IP" }
+            }       
+          ]
+      }
+    },
+    "SMGRInstance" : {
+      "Type" : "AWS::EC2::Instance",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "ImageId" : { "Ref" : "SMGRAMI"},
+        "InstanceType" : { "Ref" : "SMGRInstanceType" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SMGR-1" ] ] } }],    
+        "KeyName" : { "Ref" : "KeyName" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "0", {"Fn::GetAZs" : "" }]
+            },
+        "NetworkInterfaces" : [
+            {
+            "GroupSet"                 : [{ "Ref" : "SMGRSecurityGroup" }],
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "PrivateSubnet1" },
+            "PrivateIpAddress": { "Ref" : "SMGR1Mgt1IP" }
+            }       
+          ]
+      }
+    },
+    "SMGR2Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition": "DeployHAMgt",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "ImageId" : { "Ref" : "SMGRAMI"},
+        "InstanceType" : { "Ref" : "SMGRInstanceType" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SMGR-2" ] ] } }],    
+        "KeyName" : { "Ref" : "KeyName" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "1", {"Fn::GetAZs" : "" }]
+            },
+        "NetworkInterfaces" : [
+            {
+            "GroupSet"                 : [{ "Ref" : "SMGRSecurityGroup" }],
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "PrivateSubnet2" },
+            "PrivateIpAddress": { "Ref" : "SMGR2Mgt1IP" }
+            }       
+          ]
+      }
+    },
+    "SM1Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "ImageId" : { "Ref" : "SMAMI"},
+        "InstanceType" : { "Ref" : "SMInstanceType" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SM-1" ] ] } }],    
+        "KeyName" : { "Ref" : "KeyName" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "0", {"Fn::GetAZs" : "" }]
+            },
+        "NetworkInterfaces" : [
+            {
+            "GroupSet"                 : [{ "Ref" : "SMSecurityGroup" }],
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "PrivateSubnet1" },
+            "PrivateIpAddress": { "Ref" : "SM1Mgt1IP" }
+            }       
+          ]
+      }
+    },
+    "SM2Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition": "DeployHACore",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "ImageId" : { "Ref" : "SMAMI"},
+        "InstanceType" : { "Ref" : "SMInstanceType" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"SM-2" ] ] } }],    
+        "KeyName" : { "Ref" : "KeyName" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "1", {"Fn::GetAZs" : "" }]
+            },
+        "NetworkInterfaces" : [
+            {
+            "GroupSet"                 : [{ "Ref" : "SMSecurityGroup" }],
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "PrivateSubnet2" },
+            "PrivateIpAddress": { "Ref" : "SM2Mgt1IP" }
+            }       
+          ]
+      }
+    },
+    "CM1Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "ImageId" : { "Ref" : "CMAMI"},
+        "InstanceType" : { "Ref" : "CMInstanceType" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"CM-1" ] ] } }],    
+        "KeyName" : { "Ref" : "KeyName" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "0", {"Fn::GetAZs" : "" }]
+            },
+        "NetworkInterfaces" : [
+            {
+            "GroupSet"                 : [{ "Ref" : "CMSecurityGroup" }],
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "PrivateSubnet1" },
+            "PrivateIpAddress": { "Ref" : "CM1Mgt1IP" }
+            }       
+          ]
+      }
+    },
+    "CM2Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition": "DeployHACore",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "ImageId" : { "Ref" : "CMAMI"},
+        "InstanceType" : { "Ref" : "CMInstanceType" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"CM-2" ] ] } }],    
+        "KeyName" : { "Ref" : "KeyName" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "1", {"Fn::GetAZs" : "" }]
+            },
+        "NetworkInterfaces" : [
+            {
+            "GroupSet"                 : [{ "Ref" : "CMSecurityGroup" }],
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "PrivateSubnet2" },
+            "PrivateIpAddress": { "Ref" : "CM2Mgt1IP" }
+            }       
+          ]
+      }
+    },
+    "MS1Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, {"Ref":"MSAMI"} ]},
+        "InstanceType" : { "Ref" : "MSInstanceType" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"MS-1" ] ] } }],    
+        "KeyName" : { "Ref" : "KeyName" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "0", {"Fn::GetAZs" : "" }]
+            },
+        "NetworkInterfaces" : [
+            {
+            "GroupSet"                 : [{ "Ref" : "CMSecurityGroup" }],
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "PrivateSubnet1" },
+            "PrivateIpAddress": { "Ref" : "MS1Mgt1IP" }
+            }       
+          ]
+      }
+    },
+    "MS2Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Condition": "DeployHACore",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, {"Ref":"MSAMI"} ]},
+        "InstanceType" : { "Ref" : "MSInstanceType" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"MS-2" ] ] } }],    
+        "KeyName" : { "Ref" : "KeyName" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "1", {"Fn::GetAZs" : "" }]
+            },
+        "NetworkInterfaces" : [
+            {
+            "GroupSet"                 : [{ "Ref" : "CMSecurityGroup" }],
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "PrivateSubnet2" },
+            "PrivateIpAddress": { "Ref" : "MS2Mgt1IP" }
+            }       
+          ]
+      }
+    },
+    "AuraBastion" : {
+      "Type" : "AWS::EC2::Instance",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, "Windows2019" ]},
+        "InstanceType" : { "Ref" : "BastionType" },
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"Bastion" ] ] } }],    
+        "KeyName" : { "Ref" : "KeyName" },
+        "AvailabilityZone" : {
+          "Fn::Select" : [ 
+          "0", {"Fn::GetAZs" : "" }]
+            },
+        "NetworkInterfaces" : [
+            {
+            "GroupSet"                 : [{ "Ref" : "BastionSecurityGroup" },{ "Ref" : "ManagementSecurityGroup" }],
+            "AssociatePublicIpAddress": "true",
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "PublicSubnet1" }
+            }       
+          ]
+      }
+    },
+    "AttachEMS1Mgt2Int": {
+      "Type" : "AWS::EC2::NetworkInterfaceAttachment",
+      "Condition": "SBCSeparateServer",
+      "Properties" : {
+          "DeleteOnTermination" : "true",
+          "DeviceIndex" : "1",
+          "InstanceId" : {"Ref" : "EMSInstance"},
+          "NetworkInterfaceId" : {"Ref" : "EMS1Mgt2Int"}
+        }
+      },
+    "AttachSBC1Mgt2Int": {
+      "Type" : "AWS::EC2::NetworkInterfaceAttachment",
+      "Properties" : {
+          "DeleteOnTermination" : "true",
+          "DeviceIndex" : "1",
+          "InstanceId" : {"Ref" : "SBCInstance"},
+          "NetworkInterfaceId" : {"Ref" : "SBC1Mgt2Int"}
+        }
+      },
+    "AttachSBC1Pvt1Int": {
+      "Type" : "AWS::EC2::NetworkInterfaceAttachment",
+      "Properties" : {
+          "DeleteOnTermination" : "true",
+          "DeviceIndex" : "2",
+          "InstanceId" : {"Ref" : "SBCInstance"},
+          "NetworkInterfaceId" : {"Ref" : "SBC1Pvt1Int"}
+        }
+    },
+    "AttachSBC1Pvt2Int": {
+      "Type" : "AWS::EC2::NetworkInterfaceAttachment",
+      "Properties" : {
+          "DeleteOnTermination" : "true",
+          "DeviceIndex" : "3",
+          "InstanceId" : {"Ref" : "SBCInstance"},
+          "NetworkInterfaceId" : {"Ref" : "SBC1Pvt2Int"}
+          }
+        },
+    "AttachSBC1Pub1Int": {
+      "Type" : "AWS::EC2::NetworkInterfaceAttachment",
+      "Properties" : {
+          "DeleteOnTermination" : "true",
+          "DeviceIndex" : "4",
+          "InstanceId" : {"Ref" : "SBCInstance"},
+          "NetworkInterfaceId" : {"Ref" : "SBC1Pub1Int"}
+        }
+    },
+    "AttachSBC1Pub2Int": {
+      "Type" : "AWS::EC2::NetworkInterfaceAttachment",
+      "Properties" : {
+          "DeleteOnTermination" : "true",
+          "DeviceIndex" : "5",
+          "InstanceId" : {"Ref" : "SBCInstance"},
+          "NetworkInterfaceId" : {"Ref" : "SBC1Pub2Int"}
+        }
+    },
+    "AttachSM1SM100Int": {
+      "Type" : "AWS::EC2::NetworkInterfaceAttachment",
+      "Properties" : {
+          "DeleteOnTermination" : "true",
+          "DeviceIndex" : "1",
+          "InstanceId" : {"Ref" : "SM1Instance"},
+          "NetworkInterfaceId" : {"Ref" : "SM1SM100Int"}
+        }
+    },
+    "AttachSBC2Mgt2Int": {
+      "Type" : "AWS::EC2::NetworkInterfaceAttachment",
+      "Condition": "SBCHA",
+      "Properties" : {
+          "DeleteOnTermination" : "true",
+          "DeviceIndex" : "1",
+          "InstanceId" : {"Ref" : "SBC2Instance"},
+          "NetworkInterfaceId" : {"Ref" : "SBC2Mgt2Int"}
+        }
+    },
+    "AttachSBC2Pvt1Int": {
+      "Type" : "AWS::EC2::NetworkInterfaceAttachment",
+      "Condition": "SBCHA",
+      "Properties" : {
+          "DeleteOnTermination" : "true",
+          "DeviceIndex" : "2",
+          "InstanceId" : {"Ref" : "SBC2Instance"},
+          "NetworkInterfaceId" : {"Ref" : "SBC2Pvt1Int"}
+        }
+    },
+    "AttachSBC2Pvt2Int": {
+      "Type" : "AWS::EC2::NetworkInterfaceAttachment",
+      "Condition": "SBCHA",
+      "Properties" : {
+          "DeleteOnTermination" : "true",
+          "DeviceIndex" : "3",
+          "InstanceId" : {"Ref" : "SBC2Instance"},
+          "NetworkInterfaceId" : {"Ref" : "SBC2Pvt2Int"}
+          }
+    },
+    "AttachSBC2Pub1Int": {
+      "Type" : "AWS::EC2::NetworkInterfaceAttachment",
+      "Condition": "SBCHA",
+      "Properties" : {
+          "DeleteOnTermination" : "true",
+          "DeviceIndex" : "4",
+          "InstanceId" : {"Ref" : "SBC2Instance"},
+          "NetworkInterfaceId" : {"Ref" : "SBC2Pub1Int"}
+        }
+    },
+    "AttachSBC2Pub2Int": {
+      "Type" : "AWS::EC2::NetworkInterfaceAttachment",
+      "Condition": "SBCHA",
+      "Properties" : {
+          "DeleteOnTermination" : "true",
+          "DeviceIndex" : "5",
+          "InstanceId" : {"Ref" : "SBC2Instance"},
+          "NetworkInterfaceId" : {"Ref" : "SBC2Pub2Int"}
+        }
+    },
+    "AttachSM2SM100Int": {
+      "Type" : "AWS::EC2::NetworkInterfaceAttachment",
+      "Condition": "DeployHACore",
+      "Properties" : {
+          "DeleteOnTermination" : "true",
+          "DeviceIndex" : "1",
+          "InstanceId" : {"Ref" : "SM2Instance"},
+          "NetworkInterfaceId" : {"Ref" : "SM2SM100Int"}
+        }
+      }
+  }
+}
