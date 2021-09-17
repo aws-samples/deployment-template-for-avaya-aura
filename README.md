@@ -49,7 +49,7 @@ Checking on import task MyImage.OVA in Virginia
 
 ### Aura Deployment Template
 
-The avayaaura.json template provides a starting point for deployments, including:
+The avaya-aura-template.json template provides a starting point for deployments, including:
 
  1. A Virtual Private Cloud.
  2. 6 subnets(Private, Public and Management in 2 availability zones).
