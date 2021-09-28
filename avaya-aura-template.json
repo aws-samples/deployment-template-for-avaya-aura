@@ -5,7 +5,7 @@
   "AWS::CloudFormation::Interface": {
     "ParameterGroups" :[
       {
-        "Label" : { "default":"Remote access Bastion" },
+        "Label" : { "default":"Remote access" },
         "Parameters" : [ "BastionType", "BastionAMI","KeyName","SSHLocation" ]
       },
       {
@@ -497,12 +497,35 @@
          "InternetGatewayId" : { "Ref" : "InternetGateway" }
        }
     },
+    "NATIP" : {
+      "DependsOn" : "AttachGateway",
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+         "Domain" : "vpc"
+      }
+   },
+    "NATGateway":{
+      "Type" : "AWS::EC2::NatGateway",
+      "DependsOn" : "AttachGateway",
+      "Properties" : {
+          "AllocationId" : { "Fn::GetAtt" : ["NATIP", "AllocationId"]},
+          "ConnectivityType" : "public",
+          "SubnetId" : { "Ref" : "PrivateSubnet1"}
+        }
+    },
 
     "RouteTable" : {
       "Type" : "AWS::EC2::RouteTable",
       "Properties" : {
         "VpcId" : {"Ref" : "VPC"},
         "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"PublicRouteTable" ] ] } }]
+      }
+    },
+    "PrivateRouteTable" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPC"},
+        "Tags" : [{"Key" : "Name","Value" :{ "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName"},"PrivateRouteTable" ] ] } }]
       }
     },
 
@@ -513,6 +536,16 @@
         "RouteTableId" : { "Ref" : "RouteTable" },
         "DestinationCidrBlock" : "0.0.0.0/0",
         "GatewayId" : { "Ref" : "InternetGateway" }
+      }
+    },
+
+    "PrivRoute" : {
+      "Type" : "AWS::EC2::Route",
+      "DependsOn" : "NATGateway",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PrivateRouteTable" },
+        "DestinationCidrBlock" : "0.0.0.0/0",
+        "NatGatewayId" : { "Ref" : "NATGateway" }
       }
     },
 
@@ -531,7 +564,20 @@
         "RouteTableId" : { "Ref" : "RouteTable" }
       }
     },
-
+    "PvtSub1RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "PrivateSubnet1" },
+        "RouteTableId" : { "Ref" : "PrivateRouteTable" }
+      }
+    },
+    "PvtSub2RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "PrivateSubnet2" },
+        "RouteTableId" : { "Ref" : "PrivateRouteTable" }
+      }
+    },
     "SBCPublicIP" : {
       "Type" : "AWS::EC2::EIP",
       "DependsOn" : "AttachGateway",
