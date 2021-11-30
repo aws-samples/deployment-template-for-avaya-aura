@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
-  "Description" : "Avaya Aura deployment template",
+  "Description" : "Avaya Aura deployment template, supported us-east-1, us-east-2, us-west-1, us-west-2, sa-east-1, eu-central-1",
   "Metadata" : {
   "AWS::CloudFormation::Interface": {
     "ParameterGroups" :[
@@ -625,7 +625,10 @@
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "MgtSub1"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "MgtSub2"}}
-         ]
+         ],
+        "SecurityGroupEgress":[
+          {"IpProtocol" : "-1", "CidrIp" : "0.0.0.0/0"}
+        ]
       }
     },
     "SBCPubSecurityGroup" : {
@@ -644,7 +647,9 @@
           { "IpProtocol" : "udp", "FromPort" : "40000", "ToPort" : "55000", "CidrIp" : "0.0.0.0/0"},
           { "IpProtocol" : "udp", "FromPort" : "5060", "ToPort" : "5061", "CidrIp" : "0.0.0.0/0"},
           { "IpProtocol" : "tcp", "FromPort" : "5060", "ToPort" : "5061", "CidrIp" : "0.0.0.0/0"}
-
+         ],
+         "SecurityGroupEgress":[
+          {"IpProtocol" : "-1", "CidrIp" : "0.0.0.0/0"}
          ]
       }
     },
@@ -661,6 +666,9 @@
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "MgtSub1"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "MgtSub2"}}
+         ],
+         "SecurityGroupEgress":[
+          {"IpProtocol" : "-1", "CidrIp" : "0.0.0.0/0"}
          ]
       }
     },
@@ -675,6 +683,9 @@
           { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}}
+         ],
+         "SecurityGroupEgress":[
+          {"IpProtocol" : "-1", "CidrIp" : "0.0.0.0/0"}
          ]
       }
     },
@@ -690,6 +701,9 @@
           { "IpProtocol" : "tcp", "FromPort" : "161", "ToPort" : "161", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}}
+         ],
+         "SecurityGroupEgress":[
+          {"IpProtocol" : "-1", "CidrIp" : "0.0.0.0/0"}
          ]
       }
     },
@@ -707,6 +721,9 @@
           { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}}
+         ],
+         "SecurityGroupEgress":[
+          {"IpProtocol" : "-1", "CidrIp" : "0.0.0.0/0"}
          ]
       }
     },
@@ -724,6 +741,9 @@
           { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "SourceSecurityGroupId" : { "Ref" : "ManagementSecurityGroup"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}}
+         ],
+         "SecurityGroupEgress":[
+          {"IpProtocol" : "-1", "CidrIp" : "0.0.0.0/0"}
          ]
       }
     },
@@ -736,6 +756,9 @@
           {"IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "SourceSecurityGroupId" : { "Ref" : "BastionSecurityGroup"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}}
+         ],
+         "SecurityGroupEgress":[
+          {"IpProtocol" : "-1", "CidrIp" : "0.0.0.0/0"}
          ]
       }
     },
@@ -747,6 +770,9 @@
         "SecurityGroupIngress" : [
           {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation"}},
           {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SSHLocation"}}
+         ],
+         "SecurityGroupEgress":[
+          {"IpProtocol" : "-1", "CidrIp" : "0.0.0.0/0"}
          ]
       }
     },
@@ -760,6 +786,9 @@
           {"IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "SourceSecurityGroupId" : { "Ref" : "BastionSecurityGroup"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub1"}},
           { "IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : { "Ref" : "PvtSub2"}}
+         ],
+         "SecurityGroupEgress":[
+          {"IpProtocol" : "-1", "CidrIp" : "0.0.0.0/0"}
          ]
       }
     },
@@ -1318,5 +1347,61 @@
           "NetworkInterfaceId" : {"Ref" : "SM2SM100Int"}
         }
       }
+  },
+  "Outputs" : {
+    "BastionIP" : {
+      "Description": "Public IP for bastion access",  
+      "Value" : { "Fn::GetAtt" : [ "AuraBastion", "PublicIp" ]}
+    },
+    "SBC1PublicIP" : {
+      "Description": "Public IP for SBC 1 access",  
+      "Value" : { "Ref" : "SBCPublicIP" }
+    },
+    "SBC2PublicIP" : {
+      "Description": "Public IP for SBC 2 access",  
+      "Value" : { "Ref" : "SBC2PublicIP" },
+      "Condition" : "SBCHA"
+    },
+    "SBC1ManagementIP" : {
+      "Description": "Session Border Controller 1 IP address",  
+      "Value" : { "Ref" : "SBC1Mgt1IP" }
+    },
+    "SBC2ManagementIP" : {
+      "Description": "Session Border Controller 2 IP address", 
+      "Value" : { "Ref" : "SBC2Mgt1IP" },
+      "Condition": "SBCHA"
+    },
+    "EMSManagementIP" : {
+      "Description": "EMS IP address",  
+      "Value" : { "Ref" : "EMS1Mgt1IP" },
+      "Condition": "SBCSeparateServer"
+    },
+    "CM1IP" : {
+      "Description": "Communication Manager 1 IP address",  
+      "Value" : { "Fn::GetAtt" : [ "CM1Instance", "PrivateIp" ]}
+    },
+    "CM2IP" : {
+      "Description": "Communication Manager 2 IP address", 
+      "Condition": "DeployHACore", 
+      "Value" : { "Fn::GetAtt" : [ "CM2Instance", "PrivateIp" ]}
+    },
+    "SM1IP" : {
+      "Description": "Session Manager 1 IP address",  
+      "Value" : { "Fn::GetAtt" : [ "SM1Instance", "PrivateIp" ]}
+    },
+    "SM2IP" : {
+      "Description": "Session Manager 2 IP address", 
+      "Condition": "DeployHACore", 
+      "Value" : { "Fn::GetAtt" : [ "SM2Instance", "PrivateIp" ]}
+    },
+    "SMGR1IP" : {
+      "Description": "System Manager 1 IP address",  
+      "Value" : { "Fn::GetAtt" : [ "SMGRInstance", "PrivateIp" ]}
+    },
+    "SMGR2IP" : {
+      "Description": "System Manager 2 IP address", 
+      "Condition": "DeployHAMgt",
+      "Value" : { "Fn::GetAtt" : [ "SMGR2Instance", "PrivateIp" ]}
+    }
   }
 }
