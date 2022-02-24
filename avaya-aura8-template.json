@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
-  "Description" : "Avaya Aura deployment template, supported us-east-1, us-east-2, us-west-1, us-west-2, sa-east-1, eu-central-1",
+  "Description" : "Avaya Aura R8.x deployment template, supported us-east-1, us-east-2, us-west-1, us-west-2, sa-east-1, eu-central-1",
   "Metadata" : {
   "AWS::CloudFormation::Interface": {
     "ParameterGroups" :[
